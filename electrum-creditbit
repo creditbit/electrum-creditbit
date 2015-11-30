@@ -446,7 +446,7 @@ if __name__ == '__main__':
         print_msg("Syntax:", cmd.syntax)
         sys.exit(1)
 
-    if cmd.max_args >= 0 and len(args) - 1 > cmd.max_args:
+    if len(args) - 1 > cmd.max_args >= 0:
         print_msg("too many arguments", args)
         print_msg("Syntax:", cmd.syntax)
         sys.exit(1)

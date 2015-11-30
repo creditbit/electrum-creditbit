@@ -161,7 +161,7 @@ class Blockchain(util.DaemonThread):
         return rev_hex(Hash(self.header_to_string(header).decode('hex')).encode('hex'))
 
     def pow_hash_header(self, header):
-        return rev_hex(getPoWHash(self.header_to_string(header).decode('hex')).encode('hex'))
+        return rev_hex(PoWHash(self.header_to_string(header).decode('hex')).encode('hex'))
 
     def path(self):
         return os.path.join(self.config.path, 'blockchain_headers')
@@ -226,10 +226,10 @@ class Blockchain(util.DaemonThread):
         if index == 0: return 0x1e0ffff0, 0x00000FFFF0000000000000000000000000000000000000000000000000000000
 
         # Creditbit: go back the full period unless it's the first retarget
-        if index == 1:
-            first = self.read_header(0)
-        else:
-            first = self.read_header((index-1)*2016-1)
+        if index == 1:		
+            first = self.read_header(0)		
+        else:		
+            first = self.read_header((index-1)*2016-1)		
         last = self.read_header(index*2016-1)
         if last is None:
             for h in chain:
@@ -237,7 +237,7 @@ class Blockchain(util.DaemonThread):
                     last = h
 
         nActualTimespan = last.get('timestamp') - first.get('timestamp')
-        nTargetTimespan = 84*60*60
+        nTargetTimespan = 15*60
         nActualTimespan = max(nActualTimespan, nTargetTimespan/4)
         nActualTimespan = min(nActualTimespan, nTargetTimespan*4)
 

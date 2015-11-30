@@ -11,18 +11,41 @@ set_verbosity(False)
 config = SimpleConfig()
 servers = filter_protocol(DEFAULT_SERVERS,'t')
 results = util.send_request(servers, {'method':'blockchain.headers.subscribe', 'params':[]})
+interfaces = map(lambda server: Interface(server, config), servers)
+
+q = Queue.Queue()
+results_queue = Queue.Queue()
+
+for i in interfaces: i.start(q)
+
+reached_servers = []
+
+while servers:
+    i = q.get(timeout=1000)
+    servers.remove(i.server)
+    if i.is_connected:
+        i.send([('blockchain.headers.subscribe', [])], lambda i, x: results_queue.put((i, x)))
+        reached_servers.append(i.server)
+        i.status = "ok"
+    else:
+        i.status = "unreachable"
 
 d = defaultdict(int)
 
-for k, r in results.items():
-    blocks = r.get('block_height')
-    d[blocks] += 1
-
-
-
-for k, v in results.items():
-    print k, v.get('block_height')
+while reached_servers:
+    i, r = results_queue.get(timeout=1000)
+    i.blocks = r.get('result').get('block_height')
+    d[i.blocks] += 1
+    reached_servers.remove(i.server)
 
 v = d.values()
 numblocks = d.keys()[v.index(max(v))]
-print "blocks:",numblocks
+
+for i in interfaces:
+    if i.status == "ok":
+        if abs(i.blocks-numblocks) > 1:
+            i.status = "lagging"
+    else:
+        i.blocks = 0
+
+    print "%30s   %d   %s   " % (i.host, i.blocks, i.status)
