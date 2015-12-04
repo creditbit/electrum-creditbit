@@ -144,7 +144,7 @@ def Hash(x):
 
 def PoWHash(x):
     if type(x) is unicode: x=x.encode('utf-8')
-    return x11_hash.X11Hash(x)
+    return x11_hash.getPoWHash(x)
 
 hash_encode = lambda x: x[::-1].encode('hex')
 hash_decode = lambda x: x.decode('hex')[::-1]
