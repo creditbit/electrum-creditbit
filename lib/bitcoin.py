@@ -144,7 +144,7 @@ def Hash(x):
 
 def PoWHash(x):
     if type(x) is unicode: x=x.encode('utf-8')
-    return x11.X11Hash(x)
+    return x11_hash.getPoWHash(x)
 
 hash_encode = lambda x: x[::-1].encode('hex')
 hash_decode = lambda x: x.decode('hex')[::-1]
@@ -390,6 +390,8 @@ def is_address(addr):
     try:
         addrtype, h = bc_address_to_hash_160(addr)
     except Exception:
+	    return False
+    if addrtype not in [28, 5]:
         return False
     return addr == hash_160_to_bc_address(h, addrtype)
 
@@ -508,27 +510,29 @@ class EC_KEY(object):
     def get_public_key(self, compressed=True):
         return point_to_ser(self.pubkey.point, compressed).encode('hex')
 
-    def sign_message(self, message, compressed, address):
-        private_key = ecdsa.SigningKey.from_secret_exponent( self.secret, curve = SECP256k1 )
+    def sign(self, msg_hash):
+        private_key = ecdsa.SigningKey.from_secret_exponent(self.secret, curve = SECP256k1)
         public_key = private_key.get_verifying_key()
-        signature = private_key.sign_digest_deterministic( Hash( msg_magic(message) ), hashfunc=hashlib.sha256, sigencode = ecdsa.util.sigencode_string )
-        assert public_key.verify_digest( signature, Hash( msg_magic(message) ), sigdecode = ecdsa.util.sigdecode_string)
+        signature = private_key.sign_digest_deterministic(msg_hash, hashfunc=hashlib.sha256, sigencode = ecdsa.util.sigencode_string)
+        assert public_key.verify_digest(signature, msg_hash, sigdecode = ecdsa.util.sigdecode_string)
+        return signature
+
+    def sign_message(self, message, compressed, address):
+        signature = self.sign(Hash(msg_magic(message)))
         for i in range(4):
-            sig = base64.b64encode( chr(27 + i + (4 if compressed else 0)) + signature )
+            sig = chr(27 + i + (4 if compressed else 0)) + signature
             try:
-                self.verify_message( address, sig, message)
+                self.verify_message(address, sig, message)
                 return sig
             except Exception:
                 continue
         else:
             raise Exception("error: cannot sign message")
 
-
     @classmethod
-    def verify_message(self, address, signature, message):
-        sig = base64.b64decode(signature)
-        if len(sig) != 65: raise Exception("Wrong encoding")
-
+    def verify_message(self, address, sig, message):
+        if len(sig) != 65:
+            raise Exception("Wrong encoding")
         nV = ord(sig[0])
         if nV < 27 or nV >= 35:
             raise Exception("Bad encoding")
@@ -537,16 +541,15 @@ class EC_KEY(object):
             nV -= 4
         else:
             compressed = False
-
         recid = nV - 27
-        h = Hash( msg_magic(message) )
-        public_key = MyVerifyingKey.from_signature( sig[1:], recid, h, curve = SECP256k1 )
 
+        h = Hash(msg_magic(message))
+        public_key = MyVerifyingKey.from_signature(sig[1:], recid, h, curve = SECP256k1)
         # check public key
-        public_key.verify_digest( sig[1:], h, sigdecode = ecdsa.util.sigdecode_string)
-
+        public_key.verify_digest(sig[1:], h, sigdecode = ecdsa.util.sigdecode_string)
+        pubkey = point_to_ser(public_key.pubkey.point, compressed)
         # check that we get the original signing address
-        addr = public_key_to_bc_address( point_to_ser(public_key.pubkey.point, compressed) )
+        addr = public_key_to_bc_address(pubkey)
         if address != addr:
             raise Exception("Bad signature")
 
@@ -677,14 +680,6 @@ TESTNET_HEADER_PUB = "043587cf"
 BITCOIN_HEADERS = (BITCOIN_HEADER_PUB, BITCOIN_HEADER_PRIV)
 TESTNET_HEADERS = (TESTNET_HEADER_PUB, TESTNET_HEADER_PRIV)
 
-BITCOIN_HEADER_ALT_PRIV = "019d9cfe"
-BITCOIN_HEADER_ALT_PUB = "019da462"
-
-TESTNET_HEADER_ALT_PRIV = "0436ef7d"
-TESTNET_HEADER_ALT_PUB = "0436f6e1"
-
-BITCOIN_HEADERS_ALT = (BITCOIN_HEADER_ALT_PUB, BITCOIN_HEADER_ALT_PRIV)
-TESTNET_HEADERS_ALT = (TESTNET_HEADER_ALT_PUB, TESTNET_HEADER_ALT_PRIV)
 
 def _get_headers(testnet):
     """Returns the correct headers for either testnet or bitcoin, in the form
@@ -706,10 +701,6 @@ def deserialize_xkey(xkey):
         head = TESTNET_HEADER_PRIV
     elif xkey_header in BITCOIN_HEADERS:
         head = BITCOIN_HEADER_PRIV
-    elif xkey_header in TESTNET_HEADERS_ALT:
-        head = TESTNET_HEADER_ALT_PRIV
-    elif xkey_header in BITCOIN_HEADERS_ALT:
-        head = BITCOIN_HEADER_ALT_PRIV
     else:
         raise Exception("Unknown xkey header: '%s'" % xkey_header)
 
@@ -758,6 +749,12 @@ def bip32_root(seed, testnet=False):
     xpub = (header_pub + "00" + "00000000" + "00000000").decode("hex") + master_c + cK
     return EncodeBase58Check(xprv), EncodeBase58Check(xpub)
 
+def xpub_from_pubkey(cK, testnet=False):
+    header_pub, header_priv = _get_headers(testnet)
+    assert cK[0] in ['\x02','\x03']
+    master_c = chr(0)*32
+    xpub = (header_pub + "00" + "00000000" + "00000000").decode("hex") + master_c + cK
+    return EncodeBase58Check(xpub)
 
 def bip32_private_derivation(xprv, branch, sequence, testnet=False):
     assert sequence.startswith(branch)

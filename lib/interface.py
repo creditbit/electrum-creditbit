@@ -60,7 +60,7 @@ class TcpInterface(threading.Thread):
         # Initially True to avoid a race; set to False on failure to create a socket or when
         # it is closed
         self.connected = True
-        self.debug = False # dump network messages. can be changed at runtime using the console
+        self.debug = True # dump network messages. can be changed at runtime using the console
         self.message_id = 0
         self.response_queue = response_queue
         self.request_queue = Queue.Queue()
