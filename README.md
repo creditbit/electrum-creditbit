@@ -1,106 +1,57 @@
-Electrum-creditbit - lightweight Creditbit client
-------------------------------------------------
+Electrum - lightweight Bitcoin client
+=====================================
 
-Licence: GNU GPL v3
+::
 
-Authors: creditbit
-
-Language: Python
-
-Homepage: http://www.creditbit.org/
-
-
-1.a) GETTING STARTED WITH UBUNTU/LINUX
-------------------
-sudo apt-get install git pyqt4-dev-tools python-pip python-dev python-slowaes
-
-sudo pip install pyasn1 pyasn1-modules pbkdf2 tlslite qrcode
-
-git clone https://github.com/creditbit/electrum-creditbit && cd electrum-creditbit
-
-pyrcc4 icons.qrc -o gui/qt/icons_rc.py
-
-sudo python setup.py install
-
-To run Electrum from this directory, just do:
----------------------------------------------
-  ./electrum-creditbit
+  Licence: GNU GPL v3
+  Author: Thomas Voegtlin
+  Language: Python
+  Homepage: https://electrum.org/
 
 
+.. image:: https://travis-ci.org/spesmilo/electrum.svg?branch=master
+    :target: https://travis-ci.org/spesmilo/electrum
+    :alt: Build Status
 
-To update your copy of the electrum client:
--------------------------------------------
-cd electrum-creditbit
 
-git pull
-
-sudo python setup.py install
-
-1.b) GETTING STARTED WITH WINDOWS
+1. GETTING STARTED
 ------------------
 
--download this repo as a zip and extract it to where you would like it to run from. 
-https://github.com/creditbit/electrum-creditbit/archive/master.zip
+To run Electrum-Creditbit from this directory, just do::
 
--download python 2.7 for windows here: https://www.python.org/ftp/python/2.7.10/python-2.7.10.msi
+    ./electrum-creditbit
 
--download Microsoft Visual C++ Compiler for Python 2.7 here: http://www.microsoft.com/en-us/download/confirmation.aspx?id=44266
+If you install Electrum-Creditbit on your system, you can run it from any
+directory.
 
--download python qt4: http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt4-4.11.3-gpl-Py2.7-Qt4.8.6-x64.exe
+If you have pip, you can do::
 
--then in ms visual studio command prompt, go into the directory electrum-creditbit:
+    python setup.py sdist
+    sudo pip install --pre dist/Electrum-Creditbit-2.3.0.tar.gz
 
-pyrcc4 icons.qrc -o gui/qt/icons_rc.py
 
-py -m pip install pip pyasn1 pyasn1-modules pbkdf2 tlslite qrcode ecdsa x11_hash
+If you don't have pip, install with::
 
-py setup.py install
+    python setup.py sdist
+    sudo python setup.py install
 
-py electrum-creditbit
 
 
 
 2. HOW OFFICIAL PACKAGES ARE CREATED
 ------------------------------------
 
-python mki18n.py
+On Linux/Windows::
 
-pyrcc4 icons.qrc -o gui/qt/icons_rc.py
+    pyrcc4 icons.qrc -o gui/qt/icons_rc.py
+    python setup.py sdist --format=zip,gztar
 
-python setup.py sdist --format=zip,gztar
+On Mac OS X::
 
-On Mac OS X:
+    # On port based installs
+    sudo python setup-release.py py2app
 
-  # On port based installs
-  
-  sudo python setup-release.py py2app
+    # On brew installs
+    ARCHFLAGS="-arch i386 -arch x86_64" sudo python setup-release.py py2app --includes sip
 
-  # On brew installs
-  
-  ARCHFLAGS="-arch i386 -arch x86_64" sudo python setup-release.py py2app --includes sip
-
-  sudo hdiutil create -fs HFS+ -volname "Electrum-creditbit" -srcfolder dist/Electrum-creditbit.app dist/electrum-creditbit-VERSION-macosx.dmg
-  
-  alternate official build method:
-  
-On Linux:
-
-python setup.py sdist --format=gztar
-  
-On Windows:
-
-export VERSION=2.0.0
-
-pyinstaller windows.spec
-
-zip -r dist/creditbit-electrum-$VERSION-win.zip dist/creditbit-electrum.exe
-
-On Mac OS X:
-
-export VERSION=2.0.0
-
-pyinstaller macosx.spec
-
-sudo hdiutil create -fs HFS+ -volname "Creditbit Electrum" -srcfolder "dist/Creditbit Electrum.app" dist/creditbit-electrum-$VERSION-mac.dmg
-
-
+    sudo hdiutil create -fs HFS+ -volname "Electrum-Creditbit" -srcfolder dist/Electrum-Creditbit.app dist/electrum-creditbit-VERSION-macosx.dmg
