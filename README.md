@@ -1,19 +1,13 @@
-Electrum - lightweight Bitcoin client
+Electrum-Creditbit - lightweight creditbit client
 =====================================
-
-::
 
   Licence: GNU GPL v3
   Author: Thomas Voegtlin
+  maintainer: creditbit
   Language: Python
-  Homepage: https://electrum.org/
+  Homepage: https://www.creditbit.org/
 
-
-.. image:: https://travis-ci.org/spesmilo/electrum.svg?branch=master
-    :target: https://travis-ci.org/spesmilo/electrum
-    :alt: Build Status
-
-
+  
 1. GETTING STARTED
 ------------------
 
