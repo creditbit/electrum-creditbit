@@ -64,7 +64,8 @@ class Blockchain():
     def __init__(self, config, network):
         self.config = config
         self.network = network
-        self.headers_url = 'http://electrum1.creditbit.org/blockchain_headers'
+        # TODO headers bootstrap
+        self.headers_url = ''#https://headers.electrum.org/blockchain_headers'
         self.local_height = 0
         self.set_local_height()
 
