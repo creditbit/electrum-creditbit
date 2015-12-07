@@ -5,12 +5,14 @@ home = 'C:\\electrum-creditbit\\'
 # We don't put these files in to actually include them in the script but to make the Analysis method scan them for imports
 a = Analysis([home+'electrum-creditbit',
               home+'gui/qt/main_window.py',
+			  home+'gui/qt/lite_window.py',
               home+'gui/text.py',
               home+'lib/util.py',
               home+'lib/wallet.py',
               home+'lib/simple_config.py',
               home+'lib/bitcoin.py',
-              home+'gui/qt/lite_window.py'
+			        home+'lib/blockchain.py'
+
               ],
              pathex=[home+'lib', home+'gui', home+'plugins', home+'packages'],
              hiddenimports=['lib', 'gui'],
