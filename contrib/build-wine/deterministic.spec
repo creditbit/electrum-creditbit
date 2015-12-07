@@ -11,7 +11,7 @@ a = Analysis([home+'electrum-creditbit',
               home+'lib/wallet.py',
               home+'lib/simple_config.py',
               home+'lib/bitcoin.py',
-			        home+'lib/blockchain.py'
+              home+'lib/blockchain.py'
 
               ],
              pathex=[home+'lib', home+'gui', home+'plugins', home+'packages'],
